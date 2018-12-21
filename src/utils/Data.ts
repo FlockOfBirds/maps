@@ -6,7 +6,7 @@ type MxObject = mendix.lib.MxObject;
 export const fetchData = (options: Data.FetchDataOptions): Promise<MxObject[]> =>
     new Promise<MxObject[]>((resolve, reject) => {
         const { guid, entity, contextObject, inputParameterEntity } = options;
-        if (entity && guid) {
+        if (entity) {
             if (options.type === "XPath") {
                 fetchByXPath({
                     guid,
@@ -15,7 +15,7 @@ export const fetchData = (options: Data.FetchDataOptions): Promise<MxObject[]> =
                 })
                 .then(mxObjects => resolve(mxObjects))
                 .catch(message => reject({ message }));
-            } else if (options.type === "microflow" && options.microflow) {
+            } else if (options.type === "microflow" && options.microflow && guid && contextObject) {
                 fetchByMicroflow(options.microflow, guid, contextObject, inputParameterEntity)
                     .then(mxObjects => resolve(mxObjects))
                     .catch(message => reject({ message }));
@@ -25,12 +25,12 @@ export const fetchData = (options: Data.FetchDataOptions): Promise<MxObject[]> =
                     .catch(message => reject({ message }));
             }
         } else {
-            reject("entity & guid are required");
+            reject("An entity is required");
         }
     });
 
 const fetchByXPath = (options: Data.FetchByXPathOptions): Promise<MxObject[]> => new Promise<MxObject[]>((resolve, reject) => {
-    const { guid, entity, constraint } = options;
+    const { entity, constraint, guid } = options;
 
     const entityPath = entity.split("/");
     const entityName = entityPath.length > 1 ? entityPath[entityPath.length - 1] : entity;

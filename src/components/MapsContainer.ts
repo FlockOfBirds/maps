@@ -135,13 +135,14 @@ class MapsContainer extends Component<MapsContainerProps, MapsContainerState> {
     private retrieveData = (locationOptions: DataSourceLocationProps, contextObject?: mendix.lib.MxObject): Promise<Location[]> =>
         new Promise((resolve, reject) => {
                 const guid = contextObject && contextObject.getGuid();
+                const hasConstraint = locationOptions.entityConstraint.indexOf("[%CurrentObject%]") > -1;
                 if (locationOptions.dataSourceType === "static") {
                     const staticLocation = parseStaticLocations([ locationOptions ]);
                     resolve(staticLocation);
                 } else if (locationOptions.dataSourceType === "context" && contextObject) {
                     this.setLocationsFromMxObjects([ contextObject ], locationOptions)
                         .then(locations => resolve(locations));
-                } else if (contextObject) {
+                } else if (contextObject || locationOptions.entityConstraint && !hasConstraint) {
                     fetchData({
                         guid,
                         type: locationOptions.dataSourceType,
